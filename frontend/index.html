@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1 Control Room Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="root">Loading...</div>
+  <script type="text/javascript">
+    const e = React.createElement;
+    function App() {
+      const [data, setData] = React.useState(null);
+      const [updated, setUpdated] = React.useState('');
+      const chartRef = React.useRef(null);
+      React.useEffect(() => {
+        const load = () => {
+          fetch('/api/live')
+            .then(r => r.json())
+            .then(d => { setData(d); setUpdated(new Date().toLocaleTimeString()); })
+            .catch(err => console.error('API error', err));
+        };
+        load();
+        const id = setInterval(load, 5000);
+        return () => clearInterval(id);
+      }, []);
+      React.useEffect(() => {
+        if (!data) return;
+        const ctx = document.getElementById('lapChart').getContext('2d');
+        if (chartRef.current) chartRef.current.destroy();
+        const labels = data.lapChart[0].positions.map((_, i) => i + 1);
+        const colors = ['#ff0000', '#00a2ff', '#ffa500'];
+        const datasets = data.lapChart.map((d, idx) => ({
+          label: d.driver,
+          data: d.positions,
+          borderColor: colors[idx % colors.length],
+          fill: false
+        }));
+        chartRef.current = new Chart(ctx, {
+          type: 'line',
+          data: { labels, datasets },
+          options: { scales: { y: { reverse: true, ticks: { stepSize: 1 } } } }
+        });
+      }, [data]);
+      if (!data) return e('div', null, 'Loading...');
+      const bestS1 = Math.min(...data.sectors.map(s => parseFloat(s.s1)));
+      const bestS2 = Math.min(...data.sectors.map(s => parseFloat(s.s2)));
+      const bestS3 = Math.min(...data.sectors.map(s => parseFloat(s.s3)));
+      const standingsRows = data.standings.map(row =>
+        e('tr', { key: row.position }, [
+          e('td', { key: 'p' }, row.position),
+          e('td', { key: 'd' }, row.driver),
+          e('td', { key: 't' }, row.team),
+          e('td', { key: 'ti' }, row.time)
+        ])
+      );
+      const messageItems = data.messages.map((m, idx) =>
+        e('li', { key: idx }, `${m.timestamp} - ${m.text}`)
+      );
+      function parseLap(t) {
+        const [m, s] = t.split(':');
+        return parseFloat(m) * 60 + parseFloat(s);
+      }
+      function cell(val, best) {
+        const style = {};
+        const num = val.includes(':') ? parseLap(val) : parseFloat(val);
+        if (num === best) style.backgroundColor = '#d0a0ff';
+        return e('td', { style }, val);
+      }
+      const sectorRows = data.sectors.map((s, idx) =>
+        e('tr', { key: idx }, [
+          e('td', null, s.driver),
+          cell(s.s1, bestS1),
+          cell(s.s2, bestS2),
+          cell(s.s3, bestS3)
+        ])
+      );
+      const pitRows = data.pitStops.map((p, idx) =>
+        e('tr', { key: idx }, [
+          e('td', null, p.lap),
+          e('td', null, p.driver),
+          e('td', null, p.duration)
+        ])
+      );
+      const bestLap = Math.min(...data.fastestLaps.map(f => parseLap(f.time)));
+      const fastRows = data.fastestLaps.map((f, idx) =>
+        e('tr', { key: idx }, [
+          e('td', null, f.driver),
+          e('td', null, f.lap),
+          cell(f.time, bestLap)
+        ])
+      );
+      const stintRows = data.stints.map((s, idx) =>
+        e('tr', { key: idx }, [
+          e('td', null, s.driver),
+          e('td', null, s.tyre),
+          e('td', null, s.laps)
+        ])
+      );
+      return e('div', null, [
+        e('div', { key: 'update' }, `Last update: ${updated}`),
+        e('h2', { key: 'title' }, 'Standings'),
+        e('table', { key: 'table', border: 1, cellPadding: 5 }, [
+          e('thead', { key: 'h' },
+            e('tr', null, [
+              e('th', { key: 'pos' }, 'Pos'),
+              e('th', { key: 'drv' }, 'Driver'),
+              e('th', { key: 'team' }, 'Team'),
+              e('th', { key: 'time' }, 'Time')
+            ])
+          ),
+          e('tbody', { key: 'b' }, standingsRows)
+        ]),
+        e('h3', { key: 'msg-title' }, 'FIA Messages'),
+        e('ul', { key: 'msgs' }, messageItems),
+        e('h3', { key: 'sectors-title' }, 'Sector Times'),
+        e('table', { key: 'sect', border: 1, cellPadding: 5 }, [
+          e('thead', null,
+            e('tr', null, [
+              e('th', null, 'Driver'),
+              e('th', null, 'S1'),
+              e('th', null, 'S2'),
+              e('th', null, 'S3')
+            ])
+          ),
+          e('tbody', null, sectorRows)
+        ]),
+        e('h3', { key: 'pits-title' }, 'Pit Stops'),
+        e('table', { key: 'pits', border: 1, cellPadding: 5 }, [
+          e('thead', null,
+            e('tr', null, [
+              e('th', null, 'Lap'),
+              e('th', null, 'Driver'),
+              e('th', null, 'Duration (s)')
+            ])
+          ),
+          e('tbody', null, pitRows)
+        ]),
+        e('h3', { key: 'stints-title' }, 'Stints'),
+        e('table', { key: 'stints', border: 1, cellPadding: 5 }, [
+          e('thead', null,
+            e('tr', null, [
+              e('th', null, 'Driver'),
+              e('th', null, 'Tyre'),
+              e('th', null, 'Laps')
+            ])
+          ),
+          e('tbody', null, stintRows)
+        ]),
+        e('h3', { key: 'fast-title' }, 'Fastest Laps'),
+        e('table', { key: 'fast', border: 1, cellPadding: 5 }, [
+          e('thead', null,
+            e('tr', null, [
+              e('th', null, 'Driver'),
+              e('th', null, 'Lap'),
+              e('th', null, 'Time')
+            ])
+          ),
+          e('tbody', null, fastRows)
+        ]),
+        e('h3', { key: 'lapchart-title' }, 'Lap Chart'),
+        e('canvas', { id: 'lapChart', width: 400, height: 200 }, null),
+        e('h3', { key: 'weather-title' }, 'Weather'),
+        e('div', { key: 'weather' }, `Air: ${data.weather.airTemp} / Track: ${data.weather.trackTemp} / Humidity: ${data.weather.humidity}`)
+      ]);
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+  </script>
+</body>
+</html>

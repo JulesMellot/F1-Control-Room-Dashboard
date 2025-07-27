@@ -1,0 +1,38 @@
+{
+  "standings": [
+    {"position": 1, "driver": "VER", "team": "Red Bull", "time": "1:32:54.123"},
+    {"position": 2, "driver": "HAM", "team": "Mercedes", "time": "+10.532"},
+    {"position": 3, "driver": "LEC", "team": "Ferrari", "time": "+20.875"}
+  ],
+  "messages": [
+    {"timestamp": "78:00", "text": "Safety Car Deployed"}
+  ],
+  "weather": {"airTemp": "27C", "trackTemp": "32C", "humidity": "40%"},
+  "sectors": [
+    {"driver": "VER", "s1": "30.1", "s2": "28.4", "s3": "33.3"},
+    {"driver": "HAM", "s1": "30.3", "s2": "28.6", "s3": "33.5"},
+    {"driver": "LEC", "s1": "30.5", "s2": "28.7", "s3": "33.6"}
+  ],
+  "pitStops": [
+    {"lap": 12, "driver": "VER", "duration": "2.3"},
+    {"lap": 14, "driver": "HAM", "duration": "2.6"},
+    {"lap": 16, "driver": "LEC", "duration": "2.4"}
+  ],
+  "fastestLaps": [
+    {"driver": "VER", "lap": 22, "time": "1:31.765"},
+    {"driver": "HAM", "lap": 24, "time": "1:32.002"},
+    {"driver": "LEC", "lap": 23, "time": "1:32.145"}
+  ],
+  "stints": [
+    {"driver": "VER", "tyre": "Soft", "laps": 12},
+    {"driver": "VER", "tyre": "Medium", "laps": 25},
+    {"driver": "HAM", "tyre": "Soft", "laps": 14},
+    {"driver": "HAM", "tyre": "Hard", "laps": 23},
+    {"driver": "LEC", "tyre": "Soft", "laps": 16}
+  ],
+  "lapChart": [
+    {"driver": "VER", "positions": [1,1,1,1,1,1,1,1,1,1]},
+    {"driver": "HAM", "positions": [2,2,2,2,2,2,2,2,2,2]},
+    {"driver": "LEC", "positions": [3,3,3,3,3,3,3,3,3,3]}
+  ]
+}

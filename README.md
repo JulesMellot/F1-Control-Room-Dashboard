@@ -62,15 +62,26 @@ Une application web immersive pour suivre en temps réel les courses de F1, avec
 - Base de données: PostgreSQL / Redis (caching)
 
 ## 6. Installation & Lancement
+
+### Backend
 ```bash
-# Cloner
-git clone <repo>
-cd f1-dashboard
-# Installer
-npm install
-# Lancer dev
-npm start
+cd backend
+# aucune dépendance à installer pour l'instant
+npm start   # lance l'API sur http://localhost:3001
 ```
+
+L'API sert des données d'exemple stockées dans `backend/sampleData.json` si la
+connexion internet n'est pas disponible. Ce fichier contient un petit jeu de
+standings ainsi que des messages FIA, la météo, les temps sectoriels, un
+historique simplifié des arrêts aux stands, un aperçu des stints par
+composé pneumatique et les meilleurs tours de chaque pilote.
+
+### Frontend
+Ouvrez `frontend/index.html` dans votre navigateur ou servez ce dossier avec un
+serveur statique de votre choix. L'application interrogera l'API locale pour
+afficher les données OpenF1.
+Les tableaux incluent désormais les stints et les meilleurs tours de chaque
+pilote. Une petite visualisation "Lap Chart" trace aussi l'évolution des positions.
 
 ## 7. Contribution
 - Créer une issue pour bug/fonctionnalité
@@ -79,3 +90,4 @@ npm start
 
 ## 8. Licence
 MIT © 2025
+La page met à jour les données toutes les cinq secondes et affiche en violet les meilleurs temps dans chaque secteur.
